@@ -23,6 +23,7 @@
                 const rom = await loadROMFile(romUpload.files[0]);
                 Module['FS_createDataFile']('/', 'cartridge_rom', rom, true, true, true);
                 window.gb = Module._launch_gameboy();
+                Module._start_gameboy_instance(gb)
             }
         }
 

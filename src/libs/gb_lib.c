@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "gameboy.h"
+#include "mmu.h"
 #include "cpu.h"
 
-static Gameboy* GAMEBOY;
+static Gameboy *GAMEBOY;
 
 Gameboy *EMSCRIPTEN_KEEPALIVE launch_gameboy()
 {
@@ -28,6 +29,11 @@ Gameboy *EMSCRIPTEN_KEEPALIVE launch_gameboy()
     return gb;
 }
 
+void EMSCRIPTEN_KEEPALIVE start_gameboy_instance(Gameboy *gb)
+{
+    start_gameboy(gb);
+}
+
 void EMSCRIPTEN_KEEPALIVE print_cpu_info(Gameboy *gb)
 {
     CPU *cpu = gb->cpu;
@@ -36,6 +42,7 @@ void EMSCRIPTEN_KEEPALIVE print_cpu_info(Gameboy *gb)
            cpu->SP, cpu->PC);
 }
 
-void EMSCRIPTEN_KEEPALIVE start_gameboy_instance(Gameboy *gb) {
-    start_gameboy(gb);
+byte EMSCRIPTEN_KEEPALIVE inspect_memory(Gameboy *gb, mem_addr addr)
+{
+    return mmu_get_byte(gb->mmu, addr);
 }

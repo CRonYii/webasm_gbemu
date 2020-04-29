@@ -47,7 +47,7 @@ int exec(CPU *cpu, opcode code)
         cpu->BC = get_imm_word(cpu);
         return 12;
     default:
-        printf("No such opcode 0x%x\n", code);
+        printf("No such opcode 0x%X\n", code);
         exit(1);
     }
 }
