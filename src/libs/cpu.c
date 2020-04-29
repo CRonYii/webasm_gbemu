@@ -23,12 +23,12 @@ CPU *create_cpu(Gameboy *gb)
     return cpu;
 }
 
-void next_op(CPU *cpu)
+int next_op(CPU *cpu)
 {
     // TODO: handle interrupt
     // fetch the opcode and increment PC
     opcode code = mmu_get_byte(cpu->gb->mmu, cpu->PC++);
-    exec(cpu, code);
+    return exec(cpu, code);
 }
 
 word get_imm_word(CPU *cpu)

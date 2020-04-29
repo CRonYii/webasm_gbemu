@@ -8,6 +8,11 @@
 #include "gbtimer.h"
 #include "cartridge.h"
 
+#define CPU_CLOCK_SPEED 4194304
+#define TICKS_PER_SECONDS 62.5
+#define CYCLES_PER_TICK (CPU_CLOCK_SPEED / TICKS_PER_SECONDS)
+#define MS_PER_TICKS (1000 / TICKS_PER_SECONDS)
+
 typedef struct Gameboy Gameboy;
 
 struct Gameboy
@@ -27,3 +32,5 @@ struct Gameboy
 Gameboy *create_gameboy(byte *rom);
 
 void free_gameboy(Gameboy *gb);
+
+void start_gameboy(Gameboy *gb);

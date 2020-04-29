@@ -1,3 +1,4 @@
+#include <emscripten/emscripten.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,4 +28,18 @@ void free_gameboy(Gameboy *gb)
     free(gb->mmu);
     free_cartridge(gb->cart);
     free(gb);
+}
+
+void next_tick(Gameboy *gb) {
+    int clock_cycles_taken = 0;
+    while (clock_cycles_taken < CYCLES_PER_TICK) {
+        clock_cycles_taken += next_op(gb->cpu);
+    }
+    emscripten_sleep(MS_PER_TICKS);
+}
+
+void start_gameboy(Gameboy *gb) {
+    while (1) {
+        next_tick(gb);
+    }
 }

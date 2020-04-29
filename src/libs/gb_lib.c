@@ -35,3 +35,7 @@ void EMSCRIPTEN_KEEPALIVE print_cpu_info(Gameboy *gb)
            cpu->AF, cpu->BC, cpu->DE, cpu->HL,
            cpu->SP, cpu->PC);
 }
+
+void EMSCRIPTEN_KEEPALIVE start_gameboy_instance(Gameboy *gb) {
+    start_gameboy(gb);
+}

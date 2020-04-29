@@ -18,3 +18,5 @@ struct CPU
 
 
 CPU *create_cpu(struct Gameboy *gb);
+
+int next_op(CPU *cpu);
