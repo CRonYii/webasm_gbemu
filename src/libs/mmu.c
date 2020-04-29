@@ -31,6 +31,7 @@ MMU *create_mmu(struct Gameboy *gb)
         exit(1);
     }
     mmu->gb = gb;
+    // TODO: initialize memory
     return mmu;
 }
 

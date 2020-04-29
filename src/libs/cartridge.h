@@ -10,6 +10,9 @@
 #define NO_MBC_ROM_SIZE 0x8000
 #define NO_MBC_RAM_SIZE 0x2000
 
+#define TITLE_START 0x0134
+#define TITLE_END 0x0143
+
 typedef struct Cartridge Cartridge;
 
 struct Cartridge
@@ -26,6 +29,8 @@ struct Cartridge
 };
 
 Cartridge *load_cartridge(byte *rom);
+
+void free_cartridge(Cartridge *cart);
 
 byte cart_get_byte(Cartridge *cart, mem_addr address);
 

@@ -72,6 +72,12 @@ Cartridge *load_cartridge(byte *rom)
     }
 }
 
+void free_cartridge(Cartridge *cart) {
+    free(cart->rom);
+    free(cart->ram);
+    free(cart);
+}
+
 byte cart_get_byte(Cartridge *cart, mem_addr address)
 {
     if (address <= 0x7FFF)
