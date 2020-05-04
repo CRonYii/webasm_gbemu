@@ -1,0 +1,2 @@
+emsdk activate latest
+nodemon
