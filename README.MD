@@ -1,7 +1,23 @@
 Gameboy Emulator in WebAssembly (C)
+# Prerequisites
+Download and install the following
+- [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
+
+- [Node.js](https://nodejs.org/)
+
+You will also need to
+```
+cd ./src/gui
+npm install
+```
+
+Note: If you are not on Windows, you will need to make your own build script
+# To Develop
+Run `./dev.ps1`
+then
+```
+cd ./src/gui
+yarn start
+```
 # To Build
-1. Download and install [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
-2. Open a terminal and move to the project directory
-3. Activate emsdk
-4. Run `./build.ps1` (if you are not on Windows, make your own build script)
-5. Serve `./output/index.html` and open in your browser
+Run `./build.ps1`
