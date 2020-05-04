@@ -1,23 +1,21 @@
 import React from 'react';
 import { readFileAsBinary } from './utils';
 import { startGameboy } from './gb';
+import { Upload, Button } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import 'antd/dist/antd.css';
 
 class App extends React.Component {
 
     render() {
         return <div>
-            <input id="rom-file" type="file" onChange={evt => this.onFileUploaded(evt.target)} />
+            <Upload
+                transformFile={readFileAsBinary}
+                customRequest={({ file: rom }) => startGameboy(rom)}
+            >
+                <Button><UploadOutlined /> Choose a ROM</Button>
+            </Upload>
         </div>
-    }
-
-    async onFileUploaded(romUpload) {
-        if (romUpload.value === '') {
-            return;
-        }
-        if (romUpload.files && romUpload.files.length >= 1) {
-            const rom = await readFileAsBinary(romUpload.files[0]);
-            startGameboy(rom);
-        }
     }
 
 }
