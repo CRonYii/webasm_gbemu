@@ -1,8 +1,8 @@
 import { CloseOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
-import { Button, List, Popconfirm } from 'antd';
+import { Button, List, Popconfirm, Row, Col } from 'antd';
 import React from 'react';
 import { OpcodeInput } from './OpcodeInput';
-import { dataRange } from './utils';
+import { dataRange, toHexText } from './utils';
 import { dataInput } from './RangedNumberInput';
 
 export class GBBinaryBuilder extends React.Component {
@@ -22,7 +22,7 @@ export class GBBinaryBuilder extends React.Component {
             <b>{op.label}</b> {op.data ?
                 <Popconfirm
                     icon={null}
-                    title={dataInput(op.datatype, { onPressEnter: (data) => this.updateOpcode(idx, { data }) })}
+                    title={dataInput(op.datatype, { key: op.data, defaultValue: op.data, onPressEnter: (data) => this.updateOpcode(idx, { data }) })}
                     okButtonProps={{ style: { display: 'none' } }}
                     cancelButtonProps={{ style: { display: 'none' } }}
                 >
@@ -80,15 +80,42 @@ export class GBBinaryBuilder extends React.Component {
     }
 
     render() {
-        return <div>
-            <List
-                size="small"
-                bordered
-                dataSource={this.state.opcodes}
-                renderItem={this.renderListItem}
-            >
-            </List>
+        return <div style={{
+            width: "80em"
+        }}>
             <OpcodeInput onSubmit={this.addOpcode} />
+            <Row gutter={24}>
+                <Col span={12}>
+                    <List
+                        size="small"
+                        bordered
+                        style={{
+                            fontFamily: 'Consolas',
+                            minHeight: '166px'
+                        }}
+                        dataSource={this.state.opcodes}
+                        renderItem={this.renderListItem}
+                    >
+                    </List>
+                </Col>
+                <Col span={12}>
+                    <List
+                        size="small"
+                        bordered
+                        style={{
+                            width: '30em',
+                            fontSize: '12px',
+                            fontFamily: 'Consolas'
+                        }}
+                        grid={{
+                            column: 16
+                        }}
+                        dataSource={this.getBinary()}
+                        renderItem={(data) => <List.Item>{toHexText(data, 2)}</List.Item>}
+                    >
+                    </List>
+                </Col>
+            </Row>
         </div>
     }
 

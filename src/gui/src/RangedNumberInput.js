@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input } from 'antd';
+import { Input, Button } from 'antd';
 import { dataRange } from './utils';
 
 const ARROW_UP = 38;
@@ -18,8 +18,9 @@ export const dataInput = (datatype, props) => {
 export class RangedNumberInput extends React.Component {
 
     state = {
-        value: null,
-        display: this.props.defaultDisplay || null
+        value: this.props.defaultValue,
+        display: this.props.defaultValue ?
+            this.props.display(this.props.defaultValue) : this.props.defaultDisplay
     }
 
     getDisplay = (value) => {
@@ -29,14 +30,14 @@ export class RangedNumberInput extends React.Component {
     }
 
     onPressEnter = () => {
-        if (this.state.value === null) {
+        if (this.state.value == null) {
             return;
         }
         if (this.props.onPressEnter) {
             this.props.onPressEnter(this.state.value)
         }
         this.setState({
-            value: null,
+            value: this.props.defaultValue,
             display: this.props.defaultDisplay
         });
     }
@@ -49,6 +50,9 @@ export class RangedNumberInput extends React.Component {
             value,
             display: this.getDisplay(value)
         });
+        if (this.props.onUpdate) {
+            this.props.onUpdate(value);
+        }
     }
 
     onChange = (value) => {
@@ -84,11 +88,11 @@ export class RangedNumberInput extends React.Component {
     }
 
     render() {
-        const { min, max } = this.props;
+        const { min, max, style } = this.props;
         return <Input
-            style={{ width: 200 }}
+            style={{ width: 200, ...style }}
             placeholder={`${min} ~ ${max}`}
-            addonAfter={this.state.display}
+            addonAfter={<Button type="link" size="small" onClick={this.onPressEnter}>{this.state.display}</Button>}
             value={this.state.value}
             onChange={evt => this.onChange(evt.target.value)}
             onPressEnter={this.onPressEnter}

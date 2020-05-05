@@ -8,13 +8,14 @@ export class OpcodeInput extends React.Component {
 
     state = {
         label: null,
+        data: null,
         opcode: null,
         datatype: null
     }
 
-    onFinish = (data) => {
+    onFinish = () => {
         if (this.props.onSubmit) {
-            const { label, opcode, datatype } = this.state;
+            const { label, data, opcode, datatype } = this.state;
             this.props.onSubmit({
                 label,
                 opcode,
@@ -52,7 +53,7 @@ export class OpcodeInput extends React.Component {
 
     dataInput = () => {
         const { datatype } = this.state;
-        return dataInput(datatype, { onPressEnter: this.onFinish });
+        return dataInput(datatype, { onUpdate: (data) => this.setState({ data }), onPressEnter: this.onFinish, style: { marginLeft: '10px' } });
     }
 
     render() {
