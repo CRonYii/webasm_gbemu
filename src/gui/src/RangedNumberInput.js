@@ -1,8 +1,19 @@
 import React from 'react';
 import { Input } from 'antd';
+import { dataRange } from './utils';
 
 const ARROW_UP = 38;
 const ARROW_DOWN = 40;
+
+export const dataInput = (datatype, props) => {
+    if (!datatype) return;
+    const { min, max, display } = dataRange[datatype];
+    return <RangedNumberInput
+        key={datatype} defaultDisplay="0x"
+        min={min} max={max} display={display}
+        {...props}
+    />
+}
 
 export class RangedNumberInput extends React.Component {
 
@@ -18,6 +29,9 @@ export class RangedNumberInput extends React.Component {
     }
 
     onPressEnter = () => {
+        if (this.state.value === null) {
+            return;
+        }
         if (this.props.onPressEnter) {
             this.props.onPressEnter(this.state.value)
         }

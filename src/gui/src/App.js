@@ -1,9 +1,10 @@
-import React from 'react';
-import { readFileAsBinary } from './utils';
-import { startGameboy } from './gb';
-import { Upload, Button } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import { Button, Upload } from 'antd';
 import 'antd/dist/antd.css';
+import React from 'react';
+import { startGameboy } from './gb';
+import { readFileAsBinary } from './utils';
+import { GBBinaryBuilder } from './GBBinaryBuilder';
 
 class App extends React.Component {
 
@@ -15,6 +16,7 @@ class App extends React.Component {
             >
                 <Button><UploadOutlined /> Choose a ROM</Button>
             </Upload>
+            <GBBinaryBuilder />
         </div>
     }
 
