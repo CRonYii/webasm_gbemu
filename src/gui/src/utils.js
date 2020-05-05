@@ -12,3 +12,7 @@ export function readFileAsBinary(file) {
         reader.readAsArrayBuffer(file);
     });
 }
+
+export function toHexText(value, precision) {
+    return '0x' + value.toString(16).padStart(precision, '0').toUpperCase();
+}
