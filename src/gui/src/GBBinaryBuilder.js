@@ -19,7 +19,7 @@ export class GBBinaryBuilder extends React.Component {
                 <Button onClick={() => this.removeOpcode(idx)} type="primary" danger shape="round" size="small"><CloseOutlined /></Button>
             ]}
         >
-            <b>{op.label}</b> {op.data ?
+            <b>{op.label}</b> {typeof op.data === 'number' ?
                 <Popconfirm
                     icon={null}
                     title={dataInput(op.datatype, { key: op.data, defaultValue: op.data, onPressEnter: (data) => this.updateOpcode(idx, { data }) })}

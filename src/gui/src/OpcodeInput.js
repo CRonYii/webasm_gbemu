@@ -41,7 +41,8 @@ export class OpcodeInput extends React.Component {
             {
                 label,
                 opcode,
-                datatype
+                datatype,
+                data: null
             },
             () => {
                 if (datatype === null) {

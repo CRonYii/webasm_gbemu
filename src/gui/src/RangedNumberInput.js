@@ -18,7 +18,7 @@ export const dataInput = (datatype, props) => {
 export class RangedNumberInput extends React.Component {
 
     state = {
-        value: this.props.defaultValue,
+        value: this.props.defaultValue || '',
         display: this.props.defaultValue ?
             this.props.display(this.props.defaultValue) : this.props.defaultDisplay
     }
@@ -55,7 +55,7 @@ export class RangedNumberInput extends React.Component {
         }
     }
 
-    onChange = (value) => {
+    onChange = (value) => {    
         if (value === '' || value === '-') {
             this.setState({
                 value
