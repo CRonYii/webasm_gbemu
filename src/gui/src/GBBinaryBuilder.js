@@ -5,6 +5,8 @@ import { OpcodeInput } from './OpcodeInput';
 import { dataRange, toHexText } from './utils';
 import { dataInput } from './RangedNumberInput';
 
+// TODO: highlight binary, label for jumps, direct add above button
+// TODO: save in local storage, one-click run in emualtor
 export class GBBinaryBuilder extends React.Component {
 
     state = {
