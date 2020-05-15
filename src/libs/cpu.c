@@ -14,8 +14,19 @@
         reg &= 0xFF00;     \
         reg |= byte;       \
     }
+#define SET_FLAG(reg, bit_idx, val)         \
+{                                           \
+    (*reg) &= (0xFF - (1 << bit_idx));      \
+    (*reg) |= val << bit_idx;               \
+}
+#define SET_ZERO(cpu, val) SET_FLAG(cpu, 7, val)
+#define SET_SUBTRACT(cpu, val) SET_FLAG(cpu, 6, val)
+#define SET_HALFCARRY(cpu, val) SET_FLAG(cpu, 5, val)
+#define SET_CARRY(cpu, val) SET_FLAG(cpu, 4, val)
 
-int exec(CPU *cpu, opcode code);
+static void set_flag(uint8_t *reg, uint8_t bit_idx, uint8_t val);
+static uint8_t get_flag(uint8_t reg, uint8_t bit_idx);
+static int exec(CPU *cpu, opcode code);
 
 CPU *create_cpu(Gameboy *gb)
 {
@@ -36,12 +47,12 @@ CPU *create_cpu(Gameboy *gb)
     return cpu;
 }
 
-byte get_imm_byte(CPU *cpu)
+static byte get_imm_byte(CPU *cpu)
 {
     return mmu_get_byte(cpu->gb->mmu, cpu->PC++);
 }
 
-word get_imm_word(CPU *cpu)
+static word get_imm_word(CPU *cpu)
 {
     return (word)get_imm_byte(cpu) + ((word)get_imm_byte(cpu) << 8);
 }
@@ -55,7 +66,7 @@ int next_op(CPU *cpu)
 }
 
 // returns the # of cpu cycles taken
-int exec(CPU *cpu, opcode code)
+static int exec(CPU *cpu, opcode code)
 {
     // TODO: set flags
     MMU *mmu = cpu->gb->mmu;
