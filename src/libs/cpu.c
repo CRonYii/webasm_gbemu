@@ -14,6 +14,7 @@
         reg &= 0xFF00;     \
         reg |= byte;       \
     }
+#define ASSEMBLE(high, low) ((high) << 8 & low)
 
 int exec(CPU *cpu, opcode code);
 
@@ -27,10 +28,14 @@ CPU *create_cpu(Gameboy *gb)
     }
     cpu->gb = gb;
     // initialize register values
-    cpu->AF = 0x01B0;
-    cpu->BC = 0x0013;
-    cpu->DE = 0x00D8;
-    cpu->HL = 0x014D;
+    cpu->A = 0x01;
+    cpu->F = 0xB0;
+    cpu->B = 0x00;
+    cpu->C = 0x13;
+    cpu->D = 0x00;
+    cpu->E = 0xD8;
+    cpu->H = 0x01;
+    cpu->L = 0x4D;
     cpu->SP = 0xFFFE;
     cpu->PC = 0x0100;
     return cpu;
@@ -57,32 +62,42 @@ int next_op(CPU *cpu)
 // returns the # of cpu cycles taken
 int exec(CPU *cpu, opcode code)
 {
+    int cpu_cycles;
     // TODO: set flags
     MMU *mmu = cpu->gb->mmu;
     switch (code)
     {
     case 0x00: // NOP
-        return 4;
+        break;
     case 0x01: // LD BC,d16
-        cpu->BC = get_imm_word(cpu);
-        return 12;
+        word BC = get_imm_word(cpu);
+        cpu->B = HIGH(BC);
+        cpu->C = LOW(BC);
+        break;
     case 0x02: // LD (BC),A
-        mmu_set_byte(mmu, cpu->BC, HIGH(cpu->AF));
-        return 8;
+        mmu_set_byte(mmu, ASSEMBLE(cpu->B, cpu->C), cpu->A);
+        break;
     case 0x03: // INC BC
-        cpu->BC++;
-        return 4;
+        increment_reg16(cpu->B, cpu->C);
+        break;
     case 0x04: // INC B
-        cpu->BC += 0x0100;
-        return 4;
+        cpu->B++;
+        break;
     case 0x05: // DEC B
-        cpu->BC -= 0x0100;
-        return 4;
+        cpu->B--;
+        break;
     case 0x06: //LD B,d8
-        SET_HIGH(cpu->BC, get_imm_byte(cpu));
-        return 8;
+        cpu->B = get_imm_byte(cpu);
+        break;
     default:
         printf("No such opcode 0x%X\n", code);
         exit(1);
     }
+}
+
+void increment_reg16(reg_8 high, reg_8 low)
+{
+    low++;
+    if (!low)
+        high++;
 }
