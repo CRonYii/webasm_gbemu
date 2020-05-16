@@ -1,9 +1,10 @@
-import { CloseOutlined, UpOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, List, Popconfirm, Row, Col, Tabs, Input } from 'antd';
+import { CloseOutlined, DownOutlined, PlusOutlined, UpOutlined } from '@ant-design/icons';
+import { Button, Col, Input, List, Popconfirm, Row, Tabs } from 'antd';
 import React from 'react';
+import { BinaryViewer } from './BinaryViewer';
 import { OpcodeInput } from './OpcodeInput';
-import { dataRange, toHexText } from './utils';
 import { dataInput } from './RangedNumberInput';
+import { dataRange } from './utils';
 
 const binaryFromOpcode = (op) => {
     const binary = [];
@@ -70,17 +71,6 @@ export class GBBinaryBuilder extends React.Component {
                 <b style={{ color: '#597cde' }}>{op.label}:</b>
             </List.Item>
         }
-    }
-
-    renderBinaryItem = (data, idx) => {
-        const highlight = this.state.highlightBinary;
-        let style = {
-            padding: '3px', borderRadius: '2px'
-        };
-        if (highlight && idx >= highlight[0] && idx < highlight[1]) {
-            style = { ...style, backgroundColor: '#428bca', color: 'white' };
-        }
-        return <List.Item><span style={style}>{toHexText(data, 2)}</span></List.Item>;
     }
 
     addOpcode = (opcode, idx) => {
@@ -188,21 +178,7 @@ export class GBBinaryBuilder extends React.Component {
                     </List>
                 </Col>
                 <Col span={12}>
-                    <List
-                        size="small"
-                        bordered
-                        style={{
-                            width: '32em',
-                            fontSize: '12px',
-                            fontFamily: 'Consolas'
-                        }}
-                        grid={{
-                            column: 16
-                        }}
-                        dataSource={this.getBinary()}
-                        renderItem={this.renderBinaryItem}
-                    >
-                    </List>
+                    <BinaryViewer highlightBinary={this.state.highlightBinary} binary={this.getBinary()} />
                 </Col>
             </Row>
         </div>

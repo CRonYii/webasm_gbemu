@@ -34,15 +34,19 @@ void EMSCRIPTEN_KEEPALIVE start_gameboy_instance(Gameboy *gb)
     start_gameboy(gb);
 }
 
-// void EMSCRIPTEN_KEEPALIVE print_cpu_info(Gameboy *gb)
-// {
-//     CPU *cpu = gb->cpu;
-//     printf("AF = 0x%.4X BC = 0x%.4X DE = 0x%.4X HL = 0x%.4X\nSP = 0x%.4X PC = 0x%.4X\n",
-//            cpu->AF, cpu->BC, cpu->DE, cpu->HL,
-//            cpu->SP, cpu->PC);
-// }
-
-byte EMSCRIPTEN_KEEPALIVE inspect_memory(Gameboy *gb, mem_addr addr)
+void EMSCRIPTEN_KEEPALIVE inspect_memory(Gameboy *gb, mem_addr addr, byte* buffer, mem_addr size)
 {
-    return mmu_get_byte(gb->mmu, addr);
+    for (mem_addr i = 0; i < size; i++) {
+        *buffer++ = mmu_get_byte(gb->mmu, addr + i);
+    }
+}
+
+void* EMSCRIPTEN_KEEPALIVE allocate_memory(size_t size)
+{
+    return calloc(1, size);
+}
+
+void EMSCRIPTEN_KEEPALIVE free_memory(void* ptr)
+{
+    free(ptr);
 }

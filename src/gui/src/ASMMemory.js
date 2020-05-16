@@ -1,4 +1,4 @@
-const heap = window.Module.HEAPU8;
+export const heap = window.Module.HEAPU8;
 
 export const DATA_TYPE = {
     primitive: Symbol("primitive"),
