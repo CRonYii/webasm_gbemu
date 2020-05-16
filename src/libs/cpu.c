@@ -19,6 +19,8 @@ static uint8_t get_flag(reg_8 reg, uint8_t bit_idx);
 #define GET_HALFCARRY(cpu) get_flag(cpu->F, 5)
 #define GET_CARRY(cpu) get_flag(cpu->F, 4)
 
+static void increment_reg16(reg_8 *high, reg_8 *low);
+
 static uint8_t OP_CYCLES[256] = {
     1, 3, 2, 2, 1, 1, 2, 1, 5, 2, 2, 2, 1, 1, 2, 1, // 0
     0, 3, 2, 2, 1, 1, 2, 1, 3, 2, 2, 2, 1, 1, 2, 1, // 1
@@ -78,13 +80,9 @@ int next_op(CPU *cpu)
     opcode code = get_imm_byte(cpu);
     return exec(cpu, code);
 }
-
-static void increment_reg16(reg_8 high, reg_8 low);
-
 // returns the # of cpu cycles taken
 static int exec(CPU *cpu, opcode code)
 {
-    // TODO: set flags
     MMU *mmu = cpu->gb->mmu;
     switch (code)
     {
@@ -101,17 +99,37 @@ static int exec(CPU *cpu, opcode code)
         mmu_set_byte(mmu, WORD(cpu->B, cpu->C), cpu->A);
         break;
     case 0x03: // INC BC
-        increment_reg16(&cpu->B, &cpu->C);
+        increment_reg16(&(cpu->B), &(cpu->C));
         break;
     case 0x04: // INC B
         cpu->B++;
+        if (!cpu->B)
+        {
+            SET_ZERO(cpu, 1);
+        }
+        SET_SUBTRACT(cpu, 0);
+        if (!(cpu->B & 0x0F))
+        {
+            SET_HALFCARRY(cpu, 1);
+        }
         break;
     case 0x05: // DEC B
         cpu->B--;
+        if (!cpu->B)
+        {
+            SET_ZERO(cpu, 1);
+        }
+        SET_SUBTRACT(cpu, 1);
+        if (!(cpu->B & 0x0F))
+        {
+            SET_HALFCARRY(cpu, 1);
+        }
         break;
     case 0x06: //LD B,d8
         cpu->B = get_imm_byte(cpu);
         break;
+    case 0x07: // RLCA
+
     default:
         printf("No such opcode 0x%X\n", code);
         exit(1);
@@ -130,8 +148,7 @@ static uint8_t get_flag(reg_8 reg, uint8_t bit_idx)
     return (reg & (1 << bit_idx)) >> bit_idx;
 }
 
-static void increment_reg16(reg_8 high, reg_8 low)
-
+static void increment_reg16(reg_8 *high, reg_8 *low)
 {
     (*low)++;
     if (!*low)
