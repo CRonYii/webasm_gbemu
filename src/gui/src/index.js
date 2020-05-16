@@ -6,6 +6,7 @@ import { Provider, Subscribe, Container } from 'unstated';
 class GBContainer extends Container {
 
     state = {
+        id: 0,
         gb: null,
         gb_ptr: null,
     }

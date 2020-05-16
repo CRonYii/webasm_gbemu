@@ -29,8 +29,9 @@ export class MemoryInspector extends React.Component {
     }
 
     render() {
-        const memory_buffer = this.inspectMemory(this.props.memory_address);
-        return <BinaryViewer binary={memory_buffer} />
+        const { memory_address, highlightBinary } = this.props;
+        const memory_buffer = this.inspectMemory(memory_address);
+        return <BinaryViewer binary={memory_buffer} highlightBinary={highlightBinary} />
     }
 
 }

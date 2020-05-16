@@ -15,6 +15,14 @@ export function startGameboy(gb_ptr) {
     Module._start_gameboy_instance(gb_ptr);
 }
 
+export function stepGameboy(gb_ptr) {
+    Module._step(gb_ptr);
+}
+
+export function getMemoryAt(gb_ptr, addr) {
+    return Module['_get_memory_at'](gb_ptr, addr);
+}
+
 export function allocateMemory(size) {
     return Module['_allocate_memory'](size);
 }
