@@ -4,17 +4,7 @@
 
 #define HIGH(reg) (reg >> 8)
 #define LOW(reg) (reg & 0x00FF)
-#define SET_HIGH(reg, byte) \
-    {                       \
-        reg &= 0x00FF;      \
-        reg |= byte << 8;   \
-    }
-#define SET_LOW(reg, byte) \
-    {                      \
-        reg &= 0xFF00;     \
-        reg |= byte;       \
-    }
-#define ASSEMBLE(high, low) ((high) << 8 & low)
+#define WORD(high, low) (((word)high) << 8 & low)
 
 int exec(CPU *cpu, opcode code);
 
@@ -75,10 +65,10 @@ int exec(CPU *cpu, opcode code)
         cpu->C = LOW(BC);
         break;
     case 0x02: // LD (BC),A
-        mmu_set_byte(mmu, ASSEMBLE(cpu->B, cpu->C), cpu->A);
+        mmu_set_byte(mmu, WORD(cpu->B, cpu->C), cpu->A);
         break;
     case 0x03: // INC BC
-        increment_reg16(cpu->B, cpu->C);
+        increment_reg16(&cpu->B, &cpu->C);
         break;
     case 0x04: // INC B
         cpu->B++;
@@ -95,9 +85,9 @@ int exec(CPU *cpu, opcode code)
     }
 }
 
-void increment_reg16(reg_8 high, reg_8 low)
+void increment_reg16(reg_8 *high, reg_8 *low)
 {
-    low++;
-    if (!low)
-        high++;
+    (*low)++;
+    if (!*low)
+        (*high)++;
 }
