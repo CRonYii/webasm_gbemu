@@ -5,6 +5,7 @@ import { BinaryViewer } from './BinaryViewer';
 import { OpcodeInput } from './OpcodeInput';
 import { dataInput } from './RangedNumberInput';
 import { dataRange } from './utils';
+import { launchGameboy } from './gb';
 
 const binaryFromOpcode = (op) => {
     const binary = [];
@@ -99,7 +100,7 @@ export class GBBinaryBuilder extends React.Component {
     labels = () => {
         const labels = [];
         const { opcodes } = this.state;
-        let idx = 0;
+        let idx = 0x100;
         for (const op of opcodes) {
             if (op.type === 'label') {
                 labels.push({ idx, label: op.label });
@@ -136,7 +137,7 @@ export class GBBinaryBuilder extends React.Component {
     }
 
     getBinary = () => {
-        let binary = [];
+        let binary = new Array(0x100).fill(0);
         for (const op of this.state.opcodes) {
             if (op.type === 'opcode')
                 binary.push(...binaryFromOpcode(op));
@@ -156,6 +157,12 @@ export class GBBinaryBuilder extends React.Component {
         this.setState({
             highlightBinary: idx
         });
+    }
+
+    runBinary = () => {
+        let binary = this.getBinary();
+        binary = new Uint8Array([...binary].concat(...new Array((1 << 15) - binary.length).fill(0)));
+        launchGameboy(binary);
     }
 
     render() {
@@ -178,8 +185,11 @@ export class GBBinaryBuilder extends React.Component {
                     </List>
                 </Col>
                 <Col span={12}>
-                    <BinaryViewer highlightBinary={this.state.highlightBinary} binary={this.getBinary()} />
+                    <BinaryViewer highlightBinary={this.state.highlightBinary} binary={this.getBinary().slice(0x100)} />
                 </Col>
+            </Row>
+            <Row>
+                <Col><Button onClick={this.runBinary}>Run</Button></Col>
             </Row>
         </div>
     }

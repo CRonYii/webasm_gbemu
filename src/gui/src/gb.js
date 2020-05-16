@@ -1,12 +1,14 @@
-import { dereference } from "./ASMMemory";
+import { dereference, heap } from "./ASMMemory";
 import { GBStruct } from "./gbdef";
 import { gbcontainer } from ".";
 
 const Module = window.Module;
 
-export function launchGameboy(rom) {
-    Module['FS_createDataFile']('/', 'cartridge_rom', rom, true, true, true);
-    const gb_ptr = Module._launch_gameboy();
+export function launchGameboy(binary) {
+    const buffer = allocateMemory(binary.length);
+    heap.set(binary, buffer);
+    const gb_ptr = Module._launch_gameboy(buffer);
+    freeMemory(buffer);
     const gb = dereference(gb_ptr, GBStruct.Gameboy);
     gbcontainer.setGB(gb_ptr, gb);
 }

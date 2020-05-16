@@ -19,7 +19,7 @@ class App extends React.Component {
 
         return <Collapse.Panel header="Debugger">
             <Button onClick={() => { stepGameboy(gb_ptr); this.forceUpdate() }}>Step</Button>
-            <span>Instructtion: <b>{label}</b></span>
+            <span>Instruction: <b>{label}</b></span>
             <Row gutter={24}>
                 <Col span={12}><CPUDisplay cpu={cpu} /></Col>
                 <Col span={12}><MemoryInspector memory_address={cpu.PC} gb_ptr={gb_ptr} highlightBinary={[0, length]} /></Col>
