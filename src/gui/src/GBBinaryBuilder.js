@@ -5,16 +5,32 @@ import { OpcodeInput } from './OpcodeInput';
 import { dataRange, toHexText } from './utils';
 import { dataInput } from './RangedNumberInput';
 
-// TODO: highlight binary, label for jumps, direct add above button
+const binaryFromOpcode = (op) => {
+    const binary = [];
+    const { opcode, datatype, data } = op;
+    binary.push(opcode);
+    if (datatype) {
+        const toByte = dataRange[datatype].toByte || ((val) => [val]);
+        for (const byte of toByte(data)) {
+            binary.push(byte);
+        }
+    }
+    return binary;
+}
+
+// TODO: label for jumps, direct add above button
 // TODO: save in local storage, one-click run in emualtor
 export class GBBinaryBuilder extends React.Component {
 
     state = {
-        opcodes: []
+        opcodes: [],
+        highlightBinary: false
     }
 
     renderListItem = (op, idx) => {
         return <List.Item
+            onMouseEnter={() => this.setBinaryHighlight(idx)}
+            onMouseLeave={() => this.setBinaryHighlight(false)}
             actions={[
                 <Button disabled={idx === 0} onClick={() => this.swapOpocde(idx, -1)} type="primary" shape="round" size="small"><UpOutlined /></Button>,
                 <Button disabled={idx === this.state.opcodes.length - 1} onClick={() => this.swapOpocde(idx, 1)} type="primary" shape="round" size="small"><DownOutlined /></Button>,
@@ -32,6 +48,17 @@ export class GBBinaryBuilder extends React.Component {
                 </Popconfirm>
                 : null}
         </List.Item>
+    }
+
+    renderBinaryItem = (data, idx) => {
+        const highlight = this.state.highlightBinary;
+        let style = {
+            padding: '3px', borderRadius: '2px', margin: '5px'
+        };
+        if (highlight && idx >= highlight[0] && idx < highlight[1]) {
+            style = { ...style, backgroundColor: '#428bca', color: 'white' };
+        }
+        return <List.Item><span style={style}>{toHexText(data, 2)}</span></List.Item>;
     }
 
     addOpcode = (opcode) => {
@@ -69,16 +96,23 @@ export class GBBinaryBuilder extends React.Component {
     getBinary = () => {
         let binary = [];
         for (const op of this.state.opcodes) {
-            const { opcode, datatype, data } = op;
-            binary.push(opcode);
-            if (datatype) {
-                const toByte = dataRange[datatype].toByte || ((val) => [val]);
-                for (const byte of toByte(data)) {
-                    binary.push(byte);
-                }
-            }
+            binary.push(...binaryFromOpcode(op));
         }
         return new Uint8Array(binary);
+    }
+
+    setBinaryHighlight = (idx) => {
+        if (idx !== false) {
+            const { opcodes } = this.state;
+            let from = 0;
+            for (let i = 0; i < idx; i++) {
+                from += opcodes[i].size;
+            }
+            idx = [from, from + opcodes[idx].size];
+        }
+        this.setState({
+            highlightBinary: idx
+        });
     }
 
     render() {
@@ -113,7 +147,7 @@ export class GBBinaryBuilder extends React.Component {
                             column: 16
                         }}
                         dataSource={this.getBinary()}
-                        renderItem={(data) => <List.Item>{toHexText(data, 2)}</List.Item>}
+                        renderItem={this.renderBinaryItem}
                     >
                     </List>
                 </Col>

@@ -4,6 +4,13 @@ import { dataInput } from './RangedNumberInput';
 
 const { Option } = Select;
 
+const datasize = {
+    'uint16': 2,
+    'uint8': 1,
+    'int8': 1,
+    'null': 0
+}
+
 export class OpcodeInput extends React.Component {
 
     state = {
@@ -16,11 +23,13 @@ export class OpcodeInput extends React.Component {
     onFinish = () => {
         if (this.props.onSubmit) {
             const { label, data, opcode, datatype } = this.state;
+            const size = 1 + datasize[datatype];
             this.props.onSubmit({
                 label,
                 opcode,
                 data,
-                datatype
+                datatype,
+                size
             });
         }
     }
