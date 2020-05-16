@@ -11,7 +11,7 @@ if ($prod_build) {
     emsdk activate latest
 }
 
-emcc -O3 -s WASM=1 -s FORCE_FILESYSTEM=1 -s ASYNCIFY=1 -s $srcfiles -I $include_path -o $output_path/$output_name
+emcc -O3 -s WASM=1 -s ASYNCIFY=1 -s $srcfiles -I $include_path -o $output_path/$output_name
 
 if ($prod_build) {
     cd ./src/gui
