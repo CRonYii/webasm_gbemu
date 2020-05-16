@@ -3,14 +3,15 @@ import { GBStruct } from "./gbdef";
 import { gbcontainer } from ".";
 
 const Module = window.Module;
-export let gb_ptr;
-export let gb;
 
-export function startGameboy(rom) {
+export function launchGameboy(rom) {
     Module['FS_createDataFile']('/', 'cartridge_rom', rom, true, true, true);
-    gb_ptr = Module._launch_gameboy();
-    gb = dereference(gb_ptr, GBStruct.Gameboy);
+    const gb_ptr = Module._launch_gameboy();
+    const gb = dereference(gb_ptr, GBStruct.Gameboy);
     gbcontainer.setGB(gb_ptr, gb);
+}
+
+export function startGameboy(gb_ptr) {
     Module._start_gameboy_instance(gb_ptr);
 }
 
@@ -23,7 +24,5 @@ export function freeMemory(ptr) {
 }
 
 export function inspectMemory(gb_ptr, addr, buffer, size) {
-    console.log(gb_ptr, addr, buffer, size);
-    
     Module['_inspect_memory'](gb_ptr, addr, buffer, size);
 }

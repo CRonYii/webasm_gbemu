@@ -71,6 +71,12 @@ export const to_ptr = (struct) => {
 }
 
 export const PRIMITIVE = {
+    uint8: {
+        type: DATA_TYPE.primitive,
+        name: "uint8",
+        dereference: (raw) => little_endian(raw, 1),
+        size: 1
+    },
     uint16: {
         type: DATA_TYPE.primitive,
         name: "uint16",
