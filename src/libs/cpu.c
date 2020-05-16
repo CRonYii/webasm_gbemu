@@ -19,6 +19,8 @@ static uint8_t get_flag(reg_8 reg, uint8_t bit_idx);
 #define GET_HALFCARRY(cpu) get_flag(cpu->F, 5)
 #define GET_CARRY(cpu) get_flag(cpu->F, 4)
 
+static void set_zero(CPU *cpu, reg_8 reg);
+static void set_halfcarry(CPU *cpu, reg_8 reg);
 static void increment_reg16(reg_8 *high, reg_8 *low);
 
 static uint8_t OP_CYCLES[256] = {
@@ -103,27 +105,15 @@ static int exec(CPU *cpu, opcode code)
         break;
     case 0x04: // INC B
         cpu->B++;
-        if (!cpu->B)
-        {
-            SET_ZERO(cpu, 1);
-        }
+        set_zero(cpu, cpu->B);
         SET_SUBTRACT(cpu, 0);
-        if (!(cpu->B & 0x0F))
-        {
-            SET_HALFCARRY(cpu, 1);
-        }
+        set_halfcarry(cpu, cpu->B);
         break;
     case 0x05: // DEC B
         cpu->B--;
-        if (!cpu->B)
-        {
-            SET_ZERO(cpu, 1);
-        }
+        set_zero(cpu, cpu->B);
         SET_SUBTRACT(cpu, 1);
-        if (!(cpu->B & 0x0F))
-        {
-            SET_HALFCARRY(cpu, 1);
-        }
+        set_halfcarry(cpu, cpu->B);
         break;
     case 0x06: //LD B,d8
         cpu->B = get_imm_byte(cpu);
@@ -135,6 +125,22 @@ static int exec(CPU *cpu, opcode code)
         exit(1);
     }
     return OP_CYCLES[code] * 4;
+}
+
+static void set_zero(CPU *cpu, reg_8 reg)
+{
+    if (!reg)
+    {
+        SET_ZERO(cpu, 1);
+    }
+}
+
+static void set_halfcarry(CPU *cpu, reg_8 reg)
+{
+    if (!(reg & 0x0F))
+    {
+        SET_HALFCARRY(cpu, 1);
+    }
 }
 
 static void set_flag(reg_8 *reg, uint8_t bit_idx, uint8_t val)
