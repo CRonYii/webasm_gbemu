@@ -30,11 +30,15 @@ export class RangedNumberInput extends React.Component {
     }
 
     onPressEnter = () => {
-        if (this.state.value == null) {
+        let { value } = this.props;
+        if (value === undefined) {
+            value = this.state.value;
+        }
+        if (value == null) {
             return;
         }
         if (this.props.onPressEnter) {
-            this.props.onPressEnter(this.state.value)
+            this.props.onPressEnter(value)
         }
         this.setState({
             value: this.props.defaultValue,
@@ -55,7 +59,7 @@ export class RangedNumberInput extends React.Component {
         }
     }
 
-    onChange = (value) => {    
+    onChange = (value) => {
         if (value === '' || value === '-') {
             this.setState({
                 value
@@ -88,12 +92,14 @@ export class RangedNumberInput extends React.Component {
     }
 
     render() {
-        const { min, max, style } = this.props;
+        const { value, min, max, style } = this.props;
         return <Input
             style={{ width: 200, ...style }}
             placeholder={`${min} ~ ${max}`}
-            addonAfter={<Button type="link" size="small" onClick={this.onPressEnter}>{this.state.display}</Button>}
-            value={this.state.value}
+            addonAfter={<Button type="link" size="small" onClick={this.onPressEnter}>
+                {value != null ? this.getDisplay(value) : this.state.display}
+            </Button>}
+            value={value != null ? value : this.state.value}
             onChange={evt => this.onChange(evt.target.value)}
             onPressEnter={this.onPressEnter}
             onKeyDown={this.onKeyPress}

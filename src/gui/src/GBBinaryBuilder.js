@@ -1,5 +1,5 @@
-import { CloseOutlined, UpOutlined, DownOutlined } from '@ant-design/icons';
-import { Button, List, Popconfirm, Row, Col } from 'antd';
+import { CloseOutlined, UpOutlined, DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, List, Popconfirm, Row, Col, Tabs, Input } from 'antd';
 import React from 'react';
 import { OpcodeInput } from './OpcodeInput';
 import { dataRange, toHexText } from './utils';
@@ -18,7 +18,6 @@ const binaryFromOpcode = (op) => {
     return binary;
 }
 
-// TODO: label for jumps, direct add above button
 // TODO: save in local storage, one-click run in emualtor
 export class GBBinaryBuilder extends React.Component {
 
@@ -27,33 +26,56 @@ export class GBBinaryBuilder extends React.Component {
         highlightBinary: false
     }
 
+    opcode_actions = (idx) => [
+        <Popconfirm
+            icon={null} okButtonProps={{ style: { display: 'none' } }} cancelButtonProps={{ style: { display: 'none' } }}
+            title={
+                <Tabs style={{ width: 200 }}>
+                    <Tabs.TabPane tab="Add Opcode" key="1">
+                        <OpcodeInput labels={this.labels()} onSubmit={op => this.addOpcode(op, idx)} />
+                    </Tabs.TabPane>
+                    <Tabs.TabPane tab="Add Label" key="2">
+                        <Input onPressEnter={(evt) => this.addLabel(evt.target.value, idx)} />
+                    </Tabs.TabPane>
+                </Tabs>
+            }
+        ><Button type="primary" shape="round" size="small"><PlusOutlined /></Button></Popconfirm>,
+        <Button disabled={idx === 0} onClick={() => this.swapOpocde(idx, -1)} type="primary" shape="round" size="small"><UpOutlined /></Button>,
+        <Button disabled={idx === this.state.opcodes.length - 1} onClick={() => this.swapOpocde(idx, 1)} type="primary" shape="round" size="small"><DownOutlined /></Button>,
+        <Button onClick={() => this.removeOpcode(idx)} type="primary" danger shape="round" size="small"><CloseOutlined /></Button>
+    ];
+
     renderListItem = (op, idx) => {
-        return <List.Item
-            onMouseEnter={() => this.setBinaryHighlight(idx)}
-            onMouseLeave={() => this.setBinaryHighlight(false)}
-            actions={[
-                <Button disabled={idx === 0} onClick={() => this.swapOpocde(idx, -1)} type="primary" shape="round" size="small"><UpOutlined /></Button>,
-                <Button disabled={idx === this.state.opcodes.length - 1} onClick={() => this.swapOpocde(idx, 1)} type="primary" shape="round" size="small"><DownOutlined /></Button>,
-                <Button onClick={() => this.removeOpcode(idx)} type="primary" danger shape="round" size="small"><CloseOutlined /></Button>
-            ]}
-        >
-            <b>{op.label}</b> {typeof op.data === 'number' ?
-                <Popconfirm
-                    icon={null}
-                    title={dataInput(op.datatype, { key: op.data, defaultValue: op.data, onPressEnter: (data) => this.updateOpcode(idx, { data }) })}
-                    okButtonProps={{ style: { display: 'none' } }}
-                    cancelButtonProps={{ style: { display: 'none' } }}
-                >
-                    <Button size="small">{`${op.data}(${dataRange[op.datatype].display(op.data)})`}</Button>
-                </Popconfirm>
-                : null}
-        </List.Item>
+        if (op.type === 'opcode') {
+            return <List.Item
+                onMouseEnter={() => this.setBinaryHighlight(idx)}
+                onMouseLeave={() => this.setBinaryHighlight(false)}
+                actions={this.opcode_actions(idx)}
+            >
+                <b>{op.label}</b> {typeof op.data === 'number' ?
+                    <Popconfirm
+                        icon={null}
+                        title={dataInput(op.datatype, { key: op.data, defaultValue: op.data, onPressEnter: (data) => this.updateOpcode(idx, { data }) })}
+                        okButtonProps={{ style: { display: 'none' } }}
+                        cancelButtonProps={{ style: { display: 'none' } }}
+                    >
+                        <Button size="small">{`${op.data}(${dataRange[op.datatype].display(op.data)})`}</Button>
+                    </Popconfirm>
+                    : null}
+            </List.Item>
+        } else if (op.type === 'label') {
+            return <List.Item
+                actions={this.opcode_actions(idx)}
+            >
+                <b style={{ color: '#597cde' }}>{op.label}:</b>
+            </List.Item>
+        }
     }
 
     renderBinaryItem = (data, idx) => {
         const highlight = this.state.highlightBinary;
         let style = {
-            padding: '3px', borderRadius: '2px', margin: '5px'
+            padding: '3px', borderRadius: '2px'
         };
         if (highlight && idx >= highlight[0] && idx < highlight[1]) {
             style = { ...style, backgroundColor: '#428bca', color: 'white' };
@@ -61,10 +83,40 @@ export class GBBinaryBuilder extends React.Component {
         return <List.Item><span style={style}>{toHexText(data, 2)}</span></List.Item>;
     }
 
-    addOpcode = (opcode) => {
-        this.setState(({ opcodes }) => ({
-            opcodes: [...opcodes, opcode]
-        }));
+    addOpcode = (opcode, idx) => {
+        opcode.type = 'opcode';
+        this.setState(({ opcodes }) => {
+            if (idx === undefined) idx = opcodes.length;
+            opcodes = [...opcodes];
+            opcodes.splice(idx, 0, opcode);
+            return { opcodes };
+        });
+    }
+
+    addLabel = (label, idx) => {
+        this.setState(({ opcodes }) => {
+            if (idx === undefined) idx = opcodes.length;
+            opcodes = [...opcodes];
+            opcodes.splice(idx, 0, {
+                type: 'label',
+                label,
+                size: 0
+            });
+            return { opcodes };
+        });
+    }
+
+    labels = () => {
+        const labels = [];
+        const { opcodes } = this.state;
+        let idx = 0;
+        for (const op of opcodes) {
+            if (op.type === 'label') {
+                labels.push({ idx, label: op.label });
+            }
+            idx += op.size;
+        }
+        return labels;
     }
 
     removeOpcode = (idx) => {
@@ -96,7 +148,8 @@ export class GBBinaryBuilder extends React.Component {
     getBinary = () => {
         let binary = [];
         for (const op of this.state.opcodes) {
-            binary.push(...binaryFromOpcode(op));
+            if (op.type === 'opcode')
+                binary.push(...binaryFromOpcode(op));
         }
         return new Uint8Array(binary);
     }
@@ -119,7 +172,7 @@ export class GBBinaryBuilder extends React.Component {
         return <div style={{
             width: "80em"
         }}>
-            <OpcodeInput onSubmit={this.addOpcode} />
+            <OpcodeInput labels={this.labels()} onSubmit={this.addOpcode} dataInputStyle={{ marginLeft: '10px' }} />
             <Row gutter={24}>
                 <Col span={12}>
                     <List
@@ -139,7 +192,7 @@ export class GBBinaryBuilder extends React.Component {
                         size="small"
                         bordered
                         style={{
-                            width: '30em',
+                            width: '32em',
                             fontSize: '12px',
                             fontFamily: 'Consolas'
                         }}

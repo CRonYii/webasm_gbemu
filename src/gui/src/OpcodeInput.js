@@ -17,7 +17,8 @@ export class OpcodeInput extends React.Component {
         label: null,
         data: null,
         opcode: null,
-        datatype: null
+        datatype: null,
+        addressChooser: false
     }
 
     onFinish = () => {
@@ -51,7 +52,8 @@ export class OpcodeInput extends React.Component {
                 label,
                 opcode,
                 datatype,
-                data: null
+                data: null,
+                addressChooser: label.startsWith('JP')
             },
             () => {
                 if (datatype === null) {
@@ -63,7 +65,18 @@ export class OpcodeInput extends React.Component {
 
     dataInput = () => {
         const { datatype } = this.state;
-        return dataInput(datatype, { onUpdate: (data) => this.setState({ data }), onPressEnter: this.onFinish, style: { marginLeft: '10px' } });
+        return dataInput(datatype, { value: this.state.data, onUpdate: (data) => this.setState({ data }), onPressEnter: this.onFinish, style: this.props.dataInputStyle });
+    }
+
+    addressChooser = () => {
+        if (!this.state.addressChooser || !this.state.datatype) return;
+        return <Select style={{ width: 200 }} onSelect={(data) => this.setState({ data })}>
+            {
+                this.props.labels.map(({ label, idx }) => {
+                    return <Option key={label} value={idx}>{label}</Option>
+                })
+            }
+        </Select>
     }
 
     render() {
@@ -321,6 +334,7 @@ export class OpcodeInput extends React.Component {
                 <Option key="255" value="255:RST 38H">RST 38H</Option>
             </Select>
             {this.dataInput()}
+            {this.addressChooser()}
         </div>
     }
 
