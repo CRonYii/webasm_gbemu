@@ -22,3 +22,13 @@ export function readFileAsBinary(file) {
 export function toHexText(value, precision) {
     return value.toString(16).padStart(precision, '0').toUpperCase();
 }
+
+export function delaylock(time) {
+    let lock;
+    return (event) => () => {
+        if (lock) {
+            clearTimeout(lock);
+        }
+        lock = setTimeout(() => event(), time);
+    }
+}

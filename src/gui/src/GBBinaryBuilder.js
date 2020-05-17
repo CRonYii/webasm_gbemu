@@ -4,7 +4,7 @@ import React from 'react';
 import { BinaryViewer } from './BinaryViewer';
 import { OpcodeInput } from './OpcodeInput';
 import { dataInput } from './RangedNumberInput';
-import { dataRange } from './utils';
+import { dataRange, delaylock } from './utils';
 import { launchGameboy } from './gb';
 
 const binaryFromOpcode = (op) => {
@@ -44,6 +44,8 @@ export class GBBinaryBuilder extends React.Component {
         opcodes: [],
         highlightBinary: false,
         binary: getBinary([]),
+        highlightlock: delaylock(10),
+        page: 1
     }
 
     opcode_actions = (idx) => [
@@ -66,10 +68,12 @@ export class GBBinaryBuilder extends React.Component {
     ];
 
     renderListItem = (op, idx) => {
+        const { highlightlock, page } = this.state;
+        idx += (page - 1) * 16;
         if (op.type === 'opcode') {
             return <List.Item
-                onMouseEnter={() => this.setBinaryHighlight(idx)}
-                onMouseLeave={() => this.setBinaryHighlight(false)}
+                onMouseEnter={highlightlock(() => this.setBinaryHighlight(idx))}
+                onMouseLeave={highlightlock(() => this.setBinaryHighlight(false))}
                 actions={this.opcode_actions(idx)}
             >
                 <b>{op.label}</b> {typeof op.data === 'number' ?
@@ -173,7 +177,7 @@ export class GBBinaryBuilder extends React.Component {
     }
 
     render() {
-        const { binary } = this.state;
+        const { binary, page } = this.state;
         return <div style={{
             width: "80em"
         }}>
@@ -181,6 +185,7 @@ export class GBBinaryBuilder extends React.Component {
             <Row gutter={24}>
                 <Col span={12}>
                     <List
+                        pagination={{ pageSize: 16, current: page, onChange: (page) => this.setState({ page }) }}
                         size="small"
                         bordered
                         style={{
