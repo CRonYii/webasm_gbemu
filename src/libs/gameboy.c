@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include "gameboy.h"
+#include "jslib.h"
 
 Gameboy *create_gameboy(byte* rom)
 {
     Gameboy *gb = calloc(1, sizeof(Gameboy));
     if (!gb)
     {
-        printf("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
+        print_error("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
         exit(1);
     }
     gb->cart = load_cartridge(rom);

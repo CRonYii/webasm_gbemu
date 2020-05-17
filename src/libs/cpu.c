@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "cpu.h"
+#include "jslib.h"
 
 #define HIGH(reg) (reg >> 8)
 #define LOW(reg) (reg & 0x00FF)
@@ -45,7 +46,7 @@ CPU *create_cpu(Gameboy *gb)
     CPU *cpu = (CPU *)calloc(1, sizeof(CPU));
     if (!cpu)
     {
-        printf("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
+        print_error("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
         exit(1);
     }
     cpu->gb = gb;
@@ -131,7 +132,7 @@ static int exec(CPU *cpu, opcode code)
     case 0x07: // RLCA
 
     default:
-        printf("No such opcode 0x%X\n", code);
+        print_error("No such opcode 0x%.2X\n", code);
         exit(1);
     }
     return OP_CYCLES[code] * 4;
