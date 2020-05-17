@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "mmu.h"
+#include "jslib.h"
 
 const byte BIOS[] = {
     //  X0    X1    X2    X3    X4    X5    X6    X7    X8    X9    XA    XB    XC    XD    XE    XF
@@ -27,7 +28,7 @@ MMU *create_mmu(struct Gameboy *gb)
     MMU *mmu = calloc(1, sizeof(MMU));
     if (!mmu)
     {
-        printf("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
+        print_error("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
         exit(1);
     }
     mmu->gb = gb;
@@ -39,7 +40,7 @@ void DMA(MMU *mmu, byte src)
 {
     if (src > 0xf1)
     {
-        printf("Invalid DMA transfer request: %.4x\n", src);
+        print_error("Invalid DMA transfer request: %.4x\n", src);
         exit(1);
     }
     mem_addr offset = (mem_addr)src << 8;
@@ -105,7 +106,7 @@ byte mmu_get_byte(MMU *mmu, mem_addr address)
             }
         }
     default:
-        printf("Address not implemented 0x%x\n", address);
+        print_error("Address not implemented 0x%x\n", address);
         exit(1);
     }
 }
@@ -176,7 +177,7 @@ void mmu_set_byte(MMU *mmu, mem_addr address, byte data)
             }
         }
     default:
-        printf("Address not implemented 0x%x\n", address);
+        print_error("Address not implemented 0x%x\n", address);
         exit(1);
     }
 }

@@ -1,6 +1,6 @@
 {
     "verbose": true,
     "watch": ["./src/libs/**"],
-    "ext": "c h",
+    "ext": "c h js",
     "exec": "powershell ./build.ps1 dev"
 }

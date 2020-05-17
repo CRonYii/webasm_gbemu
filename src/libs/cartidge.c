@@ -3,6 +3,7 @@
 #include <string.h>
 #include "gbdef.h"
 #include "cartridge.h"
+#include "jslib.h"
 
 Cartridge *create_no_mbc_cartridge(byte *rom);
 
@@ -33,7 +34,7 @@ int get_rom_banks(byte *rom)
         return 80;
     if (val == 0x54)
         return 96;
-    printf("Unsupported ROM Banks #: %.4x\n", val);
+    print_error("Unsupported ROM Banks #: %.4x\n", val);
     exit(1);
 }
 
@@ -52,7 +53,7 @@ int get_ram_banks(byte *rom)
         return 16;
     if (val == 0x5)
         return 8;
-    printf("Unsupported RAM Banks #: %.4x\n", val);
+    print_error("Unsupported RAM Banks #: %.4x\n", val);
     exit(1);
 }
 
@@ -67,7 +68,7 @@ Cartridge *load_cartridge(byte *rom)
     case 0x03:
         // TODO: MBC1
     default:
-        printf("Unsupported Cartridge: %.4x\n", rom[CARTRIDGE_TYPE_IDX]);
+        print_error("Unsupported Cartridge: %.4x\n", rom[CARTRIDGE_TYPE_IDX]);
         exit(1);
     }
 }
@@ -125,7 +126,7 @@ Cartridge *create_no_mbc_cartridge(byte *rom)
     Cartridge *cart = calloc(1, sizeof(Cartridge));
     if (!cart)
     {
-        printf("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
+        print_error("%s->%s line %d: Failed to allocate memory\n", __FILE__, __FUNCTION__, __LINE__);
         exit(1);
     }
     cart->rom_banks = get_rom_banks(rom);
