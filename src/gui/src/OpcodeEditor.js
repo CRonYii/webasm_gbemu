@@ -115,7 +115,7 @@ export class OpcodeEditor extends React.Component {
     render() {
         const { page } = this.state;
         return <List
-            pagination={{ pageSize: 16, current: page, onChange: (page) => this.setState({ page }) }}
+            pagination={{ pageSize: 16, current: page, onChange: (page) => this.setState({ page }),  showSizeChanger: false }}
             size="small"
             bordered
             style={{

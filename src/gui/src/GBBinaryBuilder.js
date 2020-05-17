@@ -1,10 +1,12 @@
-import { Button, Col, Row } from 'antd';
+import { Button, Col, Row, Menu, Input, Popconfirm } from 'antd';
+import { DeleteOutlined, RightSquareOutlined, EditOutlined } from '@ant-design/icons';
 import React from 'react';
 import { BinaryViewer } from './BinaryViewer';
 import { launchGameboy } from './gb';
 import { OpcodeEditor } from './OpcodeEditor';
 import { OpcodeInput } from './OpcodeInput';
 import { dataRange } from './utils';
+import { subscribe } from './Stroage';
 
 const binaryFromOpcode = (op) => {
     const binary = [];
@@ -49,9 +51,10 @@ const populateLabels = (opcodes) => {
 }
 
 // TODO: save in local storage, one-click run in emualtor
-export class GBBinaryBuilder extends React.Component {
+class GBBinaryBuilder extends React.Component {
 
     state = {
+        name: '',
         opcodes: [],
         highlightBinary: false,
         binary: getBinary([]),
@@ -85,6 +88,13 @@ export class GBBinaryBuilder extends React.Component {
         });
     }
 
+    loadBinary = (name) => {
+        const { container } = this.props;
+        const opcodes = container.getBinary(name);
+        this.updateBinary(opcodes);
+        this.setState({ name });
+    }
+
     runBinary = () => {
         let { binary } = this.state;
         binary = new Uint8Array([...binary].concat(...new Array((1 << 15) - binary.length).fill(0)));
@@ -92,27 +102,73 @@ export class GBBinaryBuilder extends React.Component {
     }
 
     render() {
-        const { opcodes, labels, binary } = this.state;
+        const { name, opcodes, labels, binary } = this.state;
+        const { container } = this.props;
+        const { storage } = container.state;
+
         return <div style={{
             width: "80em"
         }}>
-            <OpcodeInput labels={this.state.labels} onSubmit={this.addOpcode} dataInputStyle={{ marginLeft: '10px' }} />
-            <Row gutter={24}>
-                <Col span={12}>
-                    <OpcodeEditor
-                        opcodes={opcodes}
-                        labels={labels}
-                        updateBinary={this.updateBinary}
-                        setBinaryHighlight={this.setBinaryHighlight} />
+            <Row gutter={48}>
+                <Col span={4}>
+                    <Row gutter={4}>
+                        <Col span={18}><Input placeholder={'Name'} value={name} onChange={(evt) => this.setState({ name: evt.target.value })} /></Col>
+                        <Col span={6}><Button type="primary" onClick={() => container.saveBinary(name, opcodes)}>Save</Button></Col>
+                    </Row>
+                    <Row>
+                        Saved Binaries
+                        <Col span={24}>
+                            <SideMenu keys={storage.bin.names}
+                                onLoad={this.loadBinary}
+                                onDelete={() => container.deleteBinary(name)}
+                            />
+                        </Col>
+                    </Row>
                 </Col>
-                <Col span={12}>
-                    <BinaryViewer highlightBinary={this.state.highlightBinary} binary={binary.slice(0x100)} />
+                <Col span={20}>
+                    <OpcodeInput labels={this.state.labels} onSubmit={this.addOpcode} dataInputStyle={{ marginLeft: '10px' }} />
+                    <Row gutter={24}>
+                        <Col span={16}>
+                            <OpcodeEditor
+                                opcodes={opcodes}
+                                labels={labels}
+                                updateBinary={this.updateBinary}
+                                setBinaryHighlight={this.setBinaryHighlight} />
+                        </Col>
+                        <Col span={8}>
+                            <BinaryViewer highlightBinary={this.state.highlightBinary} binary={binary.slice(0x100)} />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col><Button onClick={this.runBinary}>Run</Button></Col>
+                    </Row>
                 </Col>
-            </Row>
-            <Row>
-                <Col><Button onClick={this.runBinary}>Run</Button></Col>
             </Row>
         </div>
     }
 
 }
+
+class SideMenu extends React.Component {
+
+    renderMenuItem = (name) => {
+        const { onLoad, onDelete } = this.props;
+        return <Menu.SubMenu
+            key={name}
+            title={name}
+        >
+            <Menu.Item onClick={() => onLoad(name)}><RightSquareOutlined />Load</Menu.Item>
+            <Menu.Item style={{ color: '#ff4d4f' }} onClick={() => onDelete(name)}><DeleteOutlined />Delete</Menu.Item>
+        </Menu.SubMenu>
+    }
+
+    render() {
+        const { keys } = this.props;
+        return <Menu>
+            {keys.map(this.renderMenuItem)}
+        </Menu>;
+    }
+
+}
+
+export default subscribe(GBBinaryBuilder);

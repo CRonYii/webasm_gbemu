@@ -4,9 +4,9 @@ import 'antd/dist/antd.css';
 import React from 'react';
 import { launchGameboy, startGameboy, stepGameboy, getMemoryAt } from './gb';
 import { readFileAsBinary } from './utils';
-import { GBBinaryBuilder } from './GBBinaryBuilder';
+import GBBinaryBuilder from './GBBinaryBuilder';
 import { MemoryInspector } from './MemoryInspector';
-import { subscribe } from '.';
+import { subscribe } from './Stroage';
 import { CPUDisplay } from './CPUDisplay';
 
 class App extends React.Component {

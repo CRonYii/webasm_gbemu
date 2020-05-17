@@ -1,6 +1,6 @@
 import { dereference, heap } from "./ASMMemory";
 import { GBStruct } from "./gbdef";
-import { gbcontainer } from ".";
+import { gbcontainer } from "./Stroage";
 
 const Module = window.Module;
 
