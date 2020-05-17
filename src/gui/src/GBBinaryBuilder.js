@@ -20,12 +20,30 @@ const binaryFromOpcode = (op) => {
     return binary;
 }
 
+const getBinary = (opcodes) => {
+    let binary = new Array(0x100).fill(0);
+    for (const op of opcodes) {
+        if (op.type === 'opcode')
+            binary.push(...binaryFromOpcode(op));
+    }
+    return new Uint8Array(binary);
+}
+
+const populateBinaryPosition = (opcodes) => {
+    let idx = 0;
+    return opcodes.map((opcode) => {
+        idx += opcode.size;
+        return [idx - opcode.size, idx];
+    });
+}
+
 // TODO: save in local storage, one-click run in emualtor
 export class GBBinaryBuilder extends React.Component {
 
     state = {
         opcodes: [],
-        highlightBinary: false
+        highlightBinary: false,
+        binary: getBinary([]),
     }
 
     opcode_actions = (idx) => [
@@ -74,27 +92,33 @@ export class GBBinaryBuilder extends React.Component {
         }
     }
 
-    addOpcode = (opcode, idx) => {
-        opcode.type = 'opcode';
-        this.setState(({ opcodes }) => {
-            if (idx === undefined) idx = opcodes.length;
-            opcodes = [...opcodes];
-            opcodes.splice(idx, 0, opcode);
-            return { opcodes };
+    updateBinary = (opcodes) => {
+        this.setState({
+            opcodes,
+            binary: getBinary(opcodes),
+            binaryPosition: populateBinaryPosition(opcodes)
         });
     }
 
+    addOpcode = (opcode, idx) => {
+        opcode.type = 'opcode';
+        let { opcodes } = this.state;
+        if (idx === undefined) idx = opcodes.length;
+        opcodes = [...opcodes];
+        opcodes.splice(idx, 0, opcode);
+        this.updateBinary(opcodes);
+    }
+
     addLabel = (label, idx) => {
-        this.setState(({ opcodes }) => {
-            if (idx === undefined) idx = opcodes.length;
-            opcodes = [...opcodes];
-            opcodes.splice(idx, 0, {
-                type: 'label',
-                label,
-                size: 0
-            });
-            return { opcodes };
+        let { opcodes } = this.state;
+        if (idx === undefined) idx = opcodes.length;
+        opcodes = [...opcodes];
+        opcodes.splice(idx, 0, {
+            type: 'label',
+            label,
+            size: 0
         });
+        this.updateBinary(opcodes);
     }
 
     labels = () => {
@@ -111,48 +135,31 @@ export class GBBinaryBuilder extends React.Component {
     }
 
     removeOpcode = (idx) => {
-        this.setState(({ opcodes }) => {
-            opcodes = [...opcodes];
-            opcodes.splice(idx, 1);
-            return { opcodes };
-        });
+        let { opcodes } = this.state;
+        opcodes = [...opcodes];
+        opcodes.splice(idx, 1);
+        this.updateBinary(opcodes);
     }
 
     updateOpcode = (idx, op) => {
-        this.setState(({ opcodes }) => {
-            opcodes = [...opcodes];
-            opcodes[idx] = { ...opcodes[idx], ...op }
-            return { opcodes };
-        });
+        let { opcodes } = this.state;
+        opcodes = [...opcodes];
+        opcodes[idx] = { ...opcodes[idx], ...op }
+        this.updateBinary(opcodes);
     }
 
     swapOpocde = (idx, delta) => {
-        this.setState(({ opcodes }) => {
-            opcodes = [...opcodes];
-            const temp = opcodes[idx];
-            opcodes[idx] = opcodes[idx + delta]
-            opcodes[idx + delta] = temp;
-            return { opcodes };
-        });
-    }
-
-    getBinary = () => {
-        let binary = new Array(0x100).fill(0);
-        for (const op of this.state.opcodes) {
-            if (op.type === 'opcode')
-                binary.push(...binaryFromOpcode(op));
-        }
-        return new Uint8Array(binary);
+        let { opcodes } = this.state;
+        opcodes = [...opcodes];
+        const temp = opcodes[idx];
+        opcodes[idx] = opcodes[idx + delta]
+        opcodes[idx + delta] = temp;
+        this.updateBinary(opcodes);
     }
 
     setBinaryHighlight = (idx) => {
         if (idx !== false) {
-            const { opcodes } = this.state;
-            let from = 0;
-            for (let i = 0; i < idx; i++) {
-                from += opcodes[i].size;
-            }
-            idx = [from, from + opcodes[idx].size];
+            idx = this.state.binaryPosition[idx];
         }
         this.setState({
             highlightBinary: idx
@@ -160,12 +167,13 @@ export class GBBinaryBuilder extends React.Component {
     }
 
     runBinary = () => {
-        let binary = this.getBinary();
+        let { binary } = this.state;
         binary = new Uint8Array([...binary].concat(...new Array((1 << 15) - binary.length).fill(0)));
         launchGameboy(binary);
     }
 
     render() {
+        const { binary } = this.state;
         return <div style={{
             width: "80em"
         }}>
@@ -185,7 +193,7 @@ export class GBBinaryBuilder extends React.Component {
                     </List>
                 </Col>
                 <Col span={12}>
-                    <BinaryViewer highlightBinary={this.state.highlightBinary} binary={this.getBinary().slice(0x100)} />
+                    <BinaryViewer highlightBinary={this.state.highlightBinary} binary={binary.slice(0x100)} />
                 </Col>
             </Row>
             <Row>
